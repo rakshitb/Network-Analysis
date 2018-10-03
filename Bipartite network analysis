@@ -1,0 +1,65 @@
+# Package igraph
+library(igraph)
+
+
+# Read Data through CSV files
+data=read.csv(file.choose(),header = T)
+
+
+# Create Network: A directed graph
+net<-graph.data.frame(data,directed=T)
+
+# Check whether the network is bipartite or not with is.bipartite function in igraph package
+is_bipartite(net)
+net                   # The DN-- in output means that it is a directed network
+
+# Although networks loaded are bipartite, the is.bipartite function giving FALSE, therefore
+g_el <- as_edgelist(net)
+V(net)$type <- ifelse(V(net)$name %in% g_el[,1], TRUE, FALSE)
+is_bipartite(net)
+net                    # The DN-B in output means that it is a directed network and also bipartite,
+# Centrality Measures: https://rpubs.com/pjmurphy/317838
+
+types <- V(net)$type                 ## getting each vertex `type` let's us sort easily
+deg <- degree(net)
+bet <- betweenness(net)
+clos <- closeness(net)
+eig <- eigen_centrality(net)$vector
+
+cent_df <- data.frame(types, deg, bet, clos, eig)
+
+cent_df[order(cent_df$type, decreasing = TRUE),] ## sort w/ `order` by `type`
+
+# Bi-partite statistics
+
+# Number of top and bottom nodes
+top<-length(V(net)[type==FALSE])
+bottom<-length(V(net)[type==TRUE])
+
+# Number of edges
+m<-ecount(net)
+
+# Mean degree for top and bottom nodes
+ktop<-m/top
+kbottom<-m/bottom
+
+# Density for bipartite network
+bidens<-m/(top*bottom)
+
+# Largest connected component for top and bottom nodes:
+gclust<-clusters(net, mode='weak')
+lcc<-induced.subgraph(net, V(net)[gclust$membership==1])
+lcctop<-length(V(lcc)[type==FALSE])
+lccbottom<-length(V(lcc)[type==TRUE])
+
+# Mean distance for top and bottom nodes
+distop<-mean(shortest.paths(lcc, v=V(lcc)[type==FALSE], to=V(lcc)[type==FALSE], mode = 'all'))
+disbottom<-mean(shortest.paths(lcc, v=V(lcc)[type==TRUE], to=V(lcc)[type==TRUE], mode = 'all'))
+
+' largest Connected component'
+c=clusters(net)
+lcomponent=max(c$csize)
+
+'Clustering coefficent for each node'   ### As given in the Sciencedirect whitepaper transitivity and clustering coeff are same
+clucoeff=transitivity(net,type="local")
+

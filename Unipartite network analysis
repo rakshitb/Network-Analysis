@@ -1,0 +1,87 @@
+# Package igraph
+library(igraph)
+
+# Read Data through CSV files
+data=read.csv(file.choose(),header = T)
+
+# Convert into a data frame
+y<-data.frame(data)
+
+# Create Network: A directed graph
+net<-graph.data.frame(y,directed=T)
+
+# Vertices and Edges: Details
+V(net)
+E(net)
+V(net)$label<-V(net)$name #Vertex labels
+V(net)$degree<-degree(net)# Vertex degree
+degdata=data.frame(V(net)$label,V(net)$degree)
+
+# Centrality Measures
+indegree=degree(net,mode='in')
+#indegree
+
+outdegree=degree(net,mode='out')
+#outdegree
+
+totaldegree=degree(net)
+
+'Closeness Centrality'
+closcen=closeness(net)
+
+'Betweeness Centrality'
+betcen=betweenness(net)
+
+'Eigen-Vector Centrality'
+eigcen=eigen_centrality(net)
+
+'Clustering coefficent for each node'
+clucoeff=transitivity(net,type="local")
+
+# Graph Density, Number of Vertices, edges, and Largest connected component
+
+gdensity=edge_density(net)
+nvertices=gorder(net)
+nlinks=gsize(net)
+
+'Connected component'
+c=clusters(net)
+lcomponent=max(c$csize)
+
+
+# Data frame consiting the various parameters for each vertices
+#centraldta=data.frame(V(net)$label,totaldegree,indegree,outdegree,closcen,betcen,clucoeff,eigcen)
+
+# Writng the above data frame into a csv file
+#write.csv(centraldta,file='D:/Intern/Indian Board Data/Indian Board Data/calculated measures/unipartite/directors/network_2015.csv',row.names = FALSE)
+
+
+#### Code to calculate parameters for unipartite networks ####
+
+'Structural Equivalence'
+# In order to calculate structural equivalence, 
+# I called on the network to be undirected rather than directed
+
+# Loading package conCor from github
+library(devtools)
+devtools::install_github("aslez/concoR")
+library(concoR)
+library(igraph)
+
+
+# Concor package is used for calculating structural equivalence of nodes in social network
+# http://tagteam.harvard.edu/hub_feeds/2011/feed_items/2100977
+# https://rpubs.com/pjmurphy/325575
+
+# Convert into a data frame
+y1<-data.frame(data)
+
+# Create Network: An undirected graph
+net1<-graph.data.frame(y1,directed=FALSE)
+
+# Converting the matrix into adjancey matrix
+mat <- as.matrix(get.adjacency(net1))
+
+# Calling on the concor_hca function to calculate structural equivalence
+ste=concor_hca(list(mat),p=2)
+

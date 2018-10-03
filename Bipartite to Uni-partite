@@ -1,0 +1,24 @@
+# Package igraph
+library(igraph)
+
+# Read Data through CSV files
+data=read.csv(file.choose(),header = F)
+
+# Convert into a data frame
+y<-data.frame(data)
+
+# Create Network: An undirected graph
+net<-graph.data.frame(y,directed=F)
+
+# Adding type attribute to the network
+V(net)$type <- bipartite_mapping(net)$type 
+
+# Converting 2-Mode Network into two 1-Mode networks
+projected_net=bipartite_projection(net,multiplicity = TRUE)
+company_id=projected_net$proj1        # 1-Mode network of companies
+director_id=projected_net$proj2       # 1-Mode network of Directors
+
+## Storing the graphs in GML format ##
+write_graph(company_id,'D:/Intern/Indian Board Data/Indian Board Data/igraph csv and graphml files/graphml files/companies_network_2015.gml',format = 'graphml')
+write_graph(director_id,'D:/Intern/Indian Board Data/Indian Board Data/igraph csv and graphml files/graphml files/directors_network_2015.gml',format = 'graphml')
+
